@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FabLab Traceability</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .logo { text-align: center; margin-bottom: 25px; }
+        .logo i { font-size: 48px; color: #667eea; margin-bottom: 10px; }
+        .logo h1 { font-size: 24px; color: #333; margin-bottom: 5px; }
+        .logo p { color: #888; font-size: 14px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block; margin-bottom: 8px; font-weight: 600;
+            color: #555; font-size: 14px;
+        }
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%; padding: 14px 16px;
+            border: 2px solid #e0e0e0; border-radius: 12px;
+            font-size: 16px; transition: all 0.3s;
+        }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none; border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn {
+            width: 100%; padding: 16px; border: none;
+            border-radius: 12px; font-size: 16px;
+            font-weight: 600; cursor: pointer;
+            transition: all 0.3s;
+            display: flex; align-items: center;
+            justify-content: center; gap: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+        .btn-secondary { background: #f0f0f0; color: #555; }
+        .btn-scan {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white; height: 180px;
+            font-size: 20px; flex-direction: column; gap: 15px;
+        }
+        .btn-scan i { font-size: 48px; }
+        .hidden { display: none !important; }
+        .page { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .student-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 20px;
+            border-radius: 15px; margin-bottom: 20px;
+        }
+        .student-info h3 { font-size: 20px; margin-bottom: 5px; }
+        .student-info p { opacity: 0.9; font-size: 14px; }
+        .piece-card {
+            background: #f8f9ff; border: 2px solid #e0e0ff;
+            border-radius: 15px; padding: 20px; margin-bottom: 15px;
+        }
+        .piece-card h4 { color: #667eea; margin-bottom: 8px; }
+        .piece-card .stock {
+            display: inline-block; padding: 4px 12px;
+            border-radius: 20px; font-size: 12px;
+            font-weight: 600; margin-top: 5px;
+        }
+        .stock-ok { background: #d4edda; color: #155724; }
+        .stock-low { background: #fff3cd; color: #856404; }
+        .stock-empty { background: #f8d7da; color: #721c24; }
+        .transaction-type { display: flex; gap: 10px; margin-bottom: 20px; }
+        .transaction-type label {
+            flex: 1; padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px; text-align: center;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .transaction-type input[type="radio"] { display: none; }
+        .transaction-type input[type="radio"]:checked + label {
+            border-color: #667eea; background: #f0f0ff;
+        }
+        .transaction-type label i {
+            font-size: 24px; margin-bottom: 8px; display: block;
+        }
+        .history-item {
+            background: #f8f9ff; border-radius: 12px;
+            padding: 15px; margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .history-item .type-badge {
+            display: inline-block; padding: 3px 10px;
+            border-radius: 10px; font-size: 11px; font-weight: 600;
+        }
+        .type-sortie { background: #ffebee; color: #c62828; }
+        .type-retour { background: #e8f5e9; color: #2e7d32; }
+        .history-item .date { color: #888; font-size: 12px; margin-top: 5px; }
+        .alert {
+            padding: 15px; border-radius: 12px;
+            margin-bottom: 15px; display: flex;
+            align-items: center; gap: 10px;
+        }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+        .alert-info { background: #d1ecf1; color: #0c5460; }
+        #qr-reader {
+            width: 100%; border-radius: 15px;
+            overflow: hidden; margin-bottom: 20px;
+        }
+        #qr-reader video { border-radius: 15px; }
+        .nav-bottom {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; display: flex;
+            justify-content: space-around; padding: 12px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .nav-bottom button {
+            background: none; border: none; color: #888;
+            font-size: 12px; display: flex;
+            flex-direction: column; align-items: center;
+            gap: 4px; cursor: pointer;
+            padding: 5px 15px; transition: color 0.3s;
+        }
+        .nav-bottom button.active { color: #667eea; }
+        .nav-bottom button i { font-size: 22px; }
+        .quantity-selector {
+            display: flex; align-items: center;
+            justify-content: center; gap: 15px; margin: 20px 0;
+        }
+        .quantity-selector button {
+            width: 45px; height: 45px;
+            border-radius: 50%; border: 2px solid #667eea;
+            background: white; color: #667eea;
+            font-size: 20px; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .quantity-selector button:hover { background: #667eea; color: white; }
+        .quantity-selector span {
+            font-size: 28px; font-weight: 700;
+            min-width: 50px; text-align: center;
+        }
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 15px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 20px;
+            border-radius: 15px; text-align: center;
+        }
+        .stat-card h3 { font-size: 28px; margin-bottom: 5px; }
+        .stat-card p { font-size: 13px; opacity: 0.9; }
+        .loading {
+            display: flex; justify-content: center;
+            align-items: center; padding: 40px;
+        }
+        .loading i {
+            font-size: 30px; color: #667eea;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .empty-state {
+            text-align: center; padding: 40px 20px; color: #888;
+        }
+        .empty-state i { font-size: 48px; margin-bottom: 15px; color: #ccc; }
+        .demo-badge {
+            position: fixed; top: 10px; right: 10px;
+            background: #ff6b6b; color: white;
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 600; z-index: 9999;
+        }
+        .qr-simulate {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-top: 15px;
+        }
+        .qr-simulate button {
+            padding: 12px; border: 2px solid #667eea;
+            background: white; color: #667eea;
+            border-radius: 10px; cursor: pointer;
+            font-size: 13px; font-weight: 600;
+            transition: all 0.3s;
+        }
+        .qr-simulate button:hover {
+            background: #667eea; color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-badge">MODE DÉMO - Sans serveur</div>
+    
+    <div class="container">
+        <!-- PAGE: LOGIN -->
+        <div id="page-login" class="page">
+            <div class="card">
+                <div class="logo">
+                    <i class="fas fa-microchip"></i>
+                    <h1>FabLab Trace</h1>
+                    <p>Système de traçabilité des composants</p>
+                    <p style="color: #ff6b6b; font-size: 12px; margin-top: 10px;">
+                        <i class="fas fa-info-circle"></i> Mode démo - Fonctionne sans serveur
+                    </p>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-id-card"></i> Matricule étudiant</label>
+                    <input type="text" id="login-matricule" placeholder="Ex: GI2023001" maxlength="20" value="GI2023001">
+                </div>
+                
+                <button class="btn btn-primary" onclick="login()">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: #888; font-size: 13px;">
+                        <i class="fas fa-users"></i> 
+                        Matricules test: GI2023001 à GI2023005
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-shield-alt" style="color: #667eea;"></i> Mode Admin</h3>
+                <button class="btn btn-secondary" onclick="showPage('admin-login')">
+                    <i class="fas fa-user-shield"></i> Accès Responsable
+                </button>
+            </div>
+        </div>
+        
+        <!-- PAGE: ADMIN LOGIN -->
+        <div id="page-admin-login" class="page hidden">
+            <div class="card">
+                <div class="logo">
+                    <i class="fas fa-user-shield"></i>
+                    <h1>Admin FabLab</h1>
+                    <p>Espace responsable</p>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-key"></i> Mot de passe admin</label>
+                    <input type="password" id="admin-password" placeholder="Mot de passe" value="admin123">
+                </div>
+                
+                <button class="btn btn-primary" onclick="adminLogin()">
+                    <i class="fas fa-unlock"></i> Connexion
+                </button>
+                
+                <button class="btn btn-secondary" onclick="showPage('login')" style="margin-top: 10px;">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+            </div>
+        </div>
+        
+        <!-- PAGE: SCANNER -->
+        <div id="page-scanner" class="page hidden">
+            <div class="card">
+                <div class="student-info" id="scanner-student-info">
+                    <h3 id="scanner-student-name">--</h3>
+                    <p id="scanner-student-details">--</p>
+                </div>
+                
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-qrcode" style="color: #667eea;"></i> Scanner un composant</h3>
+                
+                <div id="qr-reader"></div>
+                
+                <button class="btn btn-scan" onclick="startScan()" id="btn-start-scan">
+                    <i class="fas fa-camera"></i>
+                    Démarrer le scan
+                </button>
+                
+                <button class="btn btn-danger hidden" onclick="stopScan()" id="btn-stop-scan">
+                    <i class="fas fa-stop"></i> Arrêter le scan
+                </button>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9ff; border-radius: 12px;">
+                    <p style="color: #667eea; font-weight: 600; margin-bottom: 10px;">
+                        <i class="fas fa-hand-pointer"></i> Simulation QR (sans caméra)
+                    </p>
+                    <p style="color: #888; font-size: 13px; margin-bottom: 10px;">
+                        Cliquez sur un composant pour simuler le scan:
+                    </p>
+                    <div class="qr-simulate" id="qr-simulate-buttons">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PAGE: TRANSACTION -->
+        <div id="page-transaction" class="page hidden">
+            <div class="card">
+                <div class="student-info">
+                    <h3 id="trans-student-name">--</h3>
+                    <p id="trans-student-details">--</p>
+                </div>
+                
+                <div class="piece-card" id="trans-piece-info">
+                    <h4 id="trans-piece-name">--</h4>
+                    <p id="trans-piece-desc" style="color: #666; font-size: 14px;">--</p>
+                    <div style="margin-top: 10px;">
+                        <span class="stock stock-ok" id="trans-piece-stock">Stock: --</span>
+                        <span style="color: #888; font-size: 13px; margin-left: 10px;" id="trans-piece-emplacement">
+                            <i class="fas fa-map-marker-alt"></i> --
+                        </span>
+                    </div>
+                </div>
+                
+                <h4 style="margin-bottom: 15px;">Type de transaction</h4>
+                <div class="transaction-type">
+                    <div>
+                        <input type="radio" name="trans-type" id="type-sortie" value="sortie" checked>
+                        <label for="type-sortie">
+                            <i class="fas fa-arrow-down" style="color: #e74c3c;"></i>
+                            Sortie
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="trans-type" id="type-retour" value="retour">
+                        <label for="type-retour">
+                            <i class="fas fa-arrow-up" style="color: #27ae60;"></i>
+                            Retour
+                        </label>
+                    </div>
+                </div>
+                
+                <h4 style="margin-bottom: 10px;">Quantité</h4>
+                <div class="quantity-selector">
+                    <button onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
+                    <span id="qty-value">1</span>
+                    <button onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-project-diagram"></i> Projet (optionnel)</label>
+                    <input type="text" id="trans-projet" placeholder="Nom du projet PFE/mini-projet">
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-comment"></i> Commentaire (optionnel)</label>
+                    <textarea id="trans-commentaire" rows="2" placeholder="Remarques..."></textarea>
+                </div>
+                
+                <button class="btn btn-success" onclick="submitTransaction()">
+                    <i class="fas fa-check-circle"></i> Valider la transaction
+                </button>
+                
+                <button class="btn btn-secondary" onclick="showPage('scanner')" style="margin-top: 10px;">
+                    <i class="fas fa-arrow-left"></i> Annuler
+                </button>
+            </div>
+        </div>
+        
+        <!-- PAGE: HISTORY -->
+        <div id="page-history" class="page hidden">
+            <div class="card">
+                <div class="student-info">
+                    <h3 id="history-student-name">--</h3>
+                    <p>Historique de vos transactions</p>
+                </div>
+                
+                <div id="history-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PAGE: PROFILE -->
+        <div id="page-profile" class="page hidden">
+            <div class="card">
+                <div class="student-info">
+                    <h3 id="profile-name">--</h3>
+                    <p id="profile-details">--</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="profile-total-sorties">0</h3>
+                        <p>Sorties</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="profile-total-retours">0</h3>
+                        <p>Retours</p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-danger" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+        
+        <!-- PAGE: ADMIN DASHBOARD -->
+        <div id="page-admin" class="page hidden">
+            <div class="card">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>Dashboard FabLab</h1>
+                    <p>Vue d'ensemble en temps réel</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="admin-total-students">0</h3>
+                        <p>Étudiants</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="admin-total-pieces">0</h3>
+                        <p>Composants</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="admin-total-trans">0</h3>
+                        <p>Transactions</p>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h3 id="admin-low-stock">0</h3>
+                        <p>Stock critique</p>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 20px 0 15px;"><i class="fas fa-history" style="color: #667eea;"></i> Transactions récentes</h3>
+                <div id="admin-recent-transactions">
+                    <div class="loading"><i class="fas fa-spinner"></i></div>
+                </div>
+                
+                <h3 style="margin: 20px 0 15px;"><i class="fas fa-exclamation-triangle" style="color: #f5576c;"></i> Stock critique</h3>
+                <div id="admin-low-stock-list">
+                    <div class="loading"><i class="fas fa-spinner"></i></div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="logout()" style="margin-top: 20px;">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+        
+        <!-- PAGE: SUCCESS -->
+        <div id="page-success" class="page hidden">
+            <div class="card" style="text-align: center; padding: 40px;">
+                <i class="fas fa-check-circle" style="font-size: 64px; color: #27ae60; margin-bottom: 20px;"></i>
+                <h2 style="margin-bottom: 10px;">Transaction enregistrée!</h2>
+                <p style="color: #888; margin-bottom: 25px;">Les données ont été sauvegardées avec succès.</p>
+                
+                <div id="success-details" style="background: #f8f9ff; padding: 20px; border-radius: 12px; margin-bottom: 25px; text-align: left;">
+                </div>
+                
+                <button class="btn btn-primary" onclick="showPage('scanner')">
+                    <i class="fas fa-qrcode"></i> Nouveau scan
+                </button>
+                
+                <button class="btn btn-secondary" onclick="showPage('history')" style="margin-top: 10px;">
+                    <i class="fas fa-history"></i> Voir l'historique
+                </button>
+            </div>
+        </div>
+        
+        <!-- ALERT CONTAINER -->
+        <div id="alert-container"></div>
+    </div>
+    
+    <!-- BOTTOM NAVIGATION (Student) -->
+    <nav class="nav-bottom hidden" id="student-nav">
+        <button class="active" onclick="showPage('scanner')" data-page="scanner">
+            <i class="fas fa-qrcode"></i> Scanner
+        </button>
+        <button onclick="showPage('history')" data-page="history">
+            <i class="fas fa-history"></i> Historique
+        </button>
+        <button onclick="showPage('profile')" data-page="profile">
+            <i class="fas fa-user"></i> Profil
+        </button>
+    </nav>
+    
+    <!-- BOTTOM NAVIGATION (Admin) -->
+    <nav class="nav-bottom hidden" id="admin-nav">
+        <button class="active" onclick="showPage('admin')" data-page="admin">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </button>
+        <button onclick="showPage('scanner')" data-page="scanner">
+            <i class="fas fa-qrcode"></i> Scan
+        </button>
+        <button onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Quitter
+        </button>
+    </nav>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        // ==================== IN-MEMORY DATABASE (No server needed!) ====================
+        
+        const DB = {
+            students: [
+                { id: 1, matricule: "GI2023001", nom: "Benali", prenom: "Ahmed", annee_etude: 3, email: "ahmed.benali@univ.dz" },
+                { id: 2, matricule: "GI2023002", nom: "Merabet", prenom: "Fatima", annee_etude: 4, email: "fatima.merabet@univ.dz" },
+                { id: 3, matricule: "GI2023003", nom: "Khelifi", prenom: "Karim", annee_etude: 2, email: "karim.khelifi@univ.dz" },
+                { id: 4, matricule: "GI2023004", nom: "Boudiaf", prenom: "Amina", annee_etude: 5, email: "amina.boudiaf@univ.dz" },
+                { id: 5, matricule: "GI2023005", nom: "Hamidi", prenom: "Youssef", annee_etude: 3, email: "youssef.hamidi@univ.dz" },
+            ],
+            pieces: [
+                { id: 1, code_qr: "QR-ARD-001", nom: "Arduino Uno R3", categorie: "Electronique", description: "Carte microcontrôleur ATmega328P", quantite_stock: 15, seuil_alerte: 3, emplacement: "Etagère A1" },
+                { id: 2, code_qr: "QR-RES-002", nom: "Résistance 220Ω (lot 100)", categorie: "Electronique", description: "Résistances carbon film 1/4W", quantite_stock: 50, seuil_alerte: 10, emplacement: "Tiroir B2" },
+                { id: 3, code_qr: "QR-LED-003", nom: "LED Rouge 5mm (lot 50)", categorie: "Electronique", description: "LED diffuse rouge 20mA", quantite_stock: 30, seuil_alerte: 5, emplacement: "Tiroir B3" },
+                { id: 4, code_qr: "QR-MOT-004", nom: "Moteur DC 12V", categorie: "Mécanique", description: "Moteur à courant continu 12V 30RPM", quantite_stock: 8, seuil_alerte: 2, emplacement: "Etagère C1" },
+                { id: 5, code_qr: "QR-SER-005", nom: "Servomoteur SG90", categorie: "Mécanique", description: "Micro servo 9g 180°", quantite_stock: 12, seuil_alerte: 3, emplacement: "Etagère C2" },
+                { id: 6, code_qr: "QR-CAP-006", nom: "Capteur Ultrason HC-SR04", categorie: "Electronique", description: "Capteur de distance ultrason", quantite_stock: 10, seuil_alerte: 2, emplacement: "Etagère A2" },
+                { id: 7, code_qr: "QR-FIL-007", nom: "Fil de connexion Mâle-Mâle", categorie: "Electronique", description: "Jumpers 40pcs 20cm", quantite_stock: 25, seuil_alerte: 5, emplacement: "Tiroir B1" },
+                { id: 8, code_qr: "QR-IMP-008", nom: "Roulement à billes 608ZZ", categorie: "Mécanique", description: "Roulement pour imprimante 3D", quantite_stock: 20, seuil_alerte: 5, emplacement: "Tiroir D1" },
+                { id: 9, code_qr: "QR-ECR-009", nom: "Écran LCD 16x2 I2C", categorie: "Electronique", description: "Afficheur LCD avec interface I2C", quantite_stock: 6, seuil_alerte: 2, emplacement: "Etagère A3" },
+                { id: 10, code_qr: "QR-PAS-010", nom: "Moteur Pas à Pas NEMA 17", categorie: "Mécanique", description: "Stepper motor 1.8° 42mm", quantite_stock: 5, seuil_alerte: 1, emplacement: "Etagère C3" },
+            ],
+            transactions: [],
+            nextTransactionId: 1
+        };
+        
+        // ==================== CONFIGURATION ====================
+        let currentStudent = null;
+        let currentPiece = null;
+        let currentQty = 1;
+        let html5QrCode = null;
+        let isAdmin = false;
+        
+        // ==================== NAVIGATION ====================
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-bottom button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll(`.nav-bottom button[data-page="${pageId}"]`).forEach(b => b.classList.add('active'));
+            
+            if (pageId !== 'scanner' && html5QrCode) stopScan();
+            if (pageId === 'history') loadHistory();
+            if (pageId === 'profile') loadProfile();
+            if (pageId === 'admin') loadAdminDashboard();
+            if (pageId === 'scanner') {
+                updateScannerInfo();
+                generateSimulateButtons();
+            }
+        }
+        
+        // ==================== AUTHENTICATION ====================
+        function login() {
+            const matricule = document.getElementById('login-matricule').value.trim();
+            if (!matricule) {
+                showAlert('Veuillez entrer votre matricule', 'error');
+                return;
+            }
+            
+            const student = DB.students.find(s => s.matricule === matricule);
+            if (student) {
+                currentStudent = student;
+                isAdmin = false;
+                document.getElementById('student-nav').classList.remove('hidden');
+                document.getElementById('admin-nav').classList.add('hidden');
+                showAlert(`Bienvenue ${student.prenom} ${student.nom}!`, 'success');
+                showPage('scanner');
+            } else {
+                showAlert('Matricule non trouvé. Essayez: GI2023001', 'error');
+            }
+        }
+        
+        function adminLogin() {
+            const password = document.getElementById('admin-password').value;
+            if (password === 'admin123') {
+                isAdmin = true;
+                currentStudent = { id: 0, nom: 'Admin', prenom: 'FabLab', annee_etude: 0, matricule: 'ADMIN' };
+                document.getElementById('student-nav').classList.add('hidden');
+                document.getElementById('admin-nav').classList.remove('hidden');
+                showAlert('Connexion admin réussie!', 'success');
+                showPage('admin');
+            } else {
+                showAlert('Mot de passe incorrect', 'error');
+            }
+        }
+        
+        function logout() {
+            currentStudent = null;
+            currentPiece = null;
+            isAdmin = false;
+            document.getElementById('student-nav').classList.add('hidden');
+            document.getElementById('admin-nav').classList.add('hidden');
+            document.getElementById('login-matricule').value = '';
+            document.getElementById('admin-password').value = '';
+            showPage('login');
+        }
+        
+        // ==================== SCANNER ====================
+        function updateScannerInfo() {
+            if (currentStudent) {
+                document.getElementById('scanner-student-name').textContent = `${currentStudent.prenom} ${currentStudent.nom}`;
+                document.getElementById('scanner-student-details').textContent = `Matricule: ${currentStudent.matricule} | ${currentStudent.annee_etude}ème année`;
+            }
+        }
+        
+        function generateSimulateButtons() {
+            const container = document.getElementById('qr-simulate-buttons');
+            container.innerHTML = DB.pieces.map(p => `
+                <button onclick="simulateScan('${p.code_qr}')">
+                    <i class="fas fa-microchip"></i><br>
+                    ${p.nom.substring(0, 15)}${p.nom.length > 15 ? '...' : ''}
+                </button>
+            `).join('');
+        }
+        
+        function simulateScan(codeQr) {
+            const piece = DB.pieces.find(p => p.code_qr === codeQr);
+            if (piece) {
+                currentPiece = piece;
+                showAlert(`QR simulé: ${piece.nom}`, 'info');
+                showTransactionPage();
+            }
+        }
+        
+        async function startScan() {
+            document.getElementById('btn-start-scan').classList.add('hidden');
+            document.getElementById('btn-stop-scan').classList.remove('hidden');
+            
+            html5QrCode = new Html5Qrcode("qr-reader");
+            
+            try {
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    onScanFailure
+                );
+            } catch (error) {
+                showAlert('Caméra non disponible. Utilisez les boutons de simulation ci-dessous.', 'info');
+                stopScan();
+            }
+        }
+        
+        function stopScan() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                    html5QrCode = null;
+                }).catch(() => {});
+            }
+            document.getElementById('btn-start-scan').classList.remove('hidden');
+            document.getElementById('btn-stop-scan').classList.add('hidden');
+        }
+        
+        async function onScanSuccess(decodedText) {
+            stopScan();
+            const piece = DB.pieces.find(p => p.code_qr === decodedText);
+            if (piece) {
+                currentPiece = piece;
+                showTransactionPage();
+            } else {
+                showAlert('Composant non trouvé', 'error');
+            }
+        }
+        
+        function onScanFailure(error) {}
+        
+        // ==================== TRANSACTION ====================
+        function showTransactionPage() {
+            if (!currentStudent || !currentPiece) return;
+            
+            document.getElementById('trans-student-name').textContent = `${currentStudent.prenom} ${currentStudent.nom}`;
+            document.getElementById('trans-student-details').textContent = `Matricule: ${currentStudent.matricule}`;
+            
+            document.getElementById('trans-piece-name').textContent = currentPiece.nom;
+            document.getElementById('trans-piece-desc').textContent = currentPiece.description || 'Aucune description';
+            document.getElementById('trans-piece-stock').textContent = `Stock: ${currentPiece.quantite_stock}`;
+            document.getElementById('trans-piece-emplacement').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${currentPiece.emplacement || 'N/A'}`;
+            
+            const stockEl = document.getElementById('trans-piece-stock');
+            stockEl.className = 'stock';
+            if (currentPiece.quantite_stock <= 0) stockEl.classList.add('stock-empty');
+            else if (currentPiece.quantite_stock <= currentPiece.seuil_alerte) stockEl.classList.add('stock-low');
+            else stockEl.classList.add('stock-ok');
+            
+            currentQty = 1;
+            document.getElementById('qty-value').textContent = currentQty;
+            document.getElementById('trans-projet').value = '';
+            document.getElementById('trans-commentaire').value = '';
+            
+            showPage('transaction');
+        }
+        
+        function changeQty(delta) {
+            currentQty = Math.max(1, currentQty + delta);
+            document.getElementById('qty-value').textContent = currentQty;
+        }
+        
+        function submitTransaction() {
+            if (!currentStudent || !currentPiece) return;
+            
+            const type = document.querySelector('input[name="trans-type"]:checked').value;
+            const projet = document.getElementById('trans-projet').value;
+            const commentaire = document.getElementById('trans-commentaire').value;
+            
+            if (type === 'sortie' && currentQty > currentPiece.quantite_stock) {
+                showAlert('Stock insuffisant pour cette quantité', 'error');
+                return;
+            }
+            
+            // Update stock
+            if (type === 'sortie') {
+                currentPiece.quantite_stock -= currentQty;
+            } else {
+                currentPiece.quantite_stock += currentQty;
+            }
+            
+            // Create transaction
+            const transaction = {
+                id: DB.nextTransactionId++,
+                etudiant_id: currentStudent.id,
+                piece_id: currentPiece.id,
+                type: type,
+                quantite: currentQty,
+                date_heure: new Date().toISOString(),
+                projet: projet || null,
+                commentaire: commentaire || null,
+                etudiant_nom: currentStudent.nom,
+                etudiant_prenom: currentStudent.prenom,
+                piece_nom: currentPiece.nom,
+                piece_code_qr: currentPiece.code_qr
+            };
+            
+            DB.transactions.unshift(transaction);
+            
+            showSuccessPage(transaction);
+        }
+        
+        // ==================== SUCCESS PAGE ====================
+        function showSuccessPage(transaction) {
+            const details = document.getElementById('success-details');
+            const typeLabel = transaction.type === 'sortie' ? 'Sortie' : 'Retour';
+            const typeIcon = transaction.type === 'sortie' ? 'fa-arrow-down' : 'fa-arrow-up';
+            const typeColor = transaction.type === 'sortie' ? '#e74c3c' : '#27ae60';
+            
+            details.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <i class="fas ${typeIcon}" style="font-size: 32px; color: ${typeColor};"></i>
+                    <div>
+                        <h4 style="margin: 0;">${typeLabel} de composant</h4>
+                        <p style="color: #888; margin: 5px 0 0; font-size: 13px;">${new Date(transaction.date_heure).toLocaleString('fr-FR')}</p>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid #e0e0e0; padding-top: 15px;">
+                    <p style="margin-bottom: 8px;"><strong>Composant:</strong> ${transaction.piece_nom}</p>
+                    <p style="margin-bottom: 8px;"><strong>Quantité:</strong> ${transaction.quantite}</p>
+                    <p style="margin-bottom: 8px;"><strong>Étudiant:</strong> ${transaction.etudiant_prenom} ${transaction.etudiant_nom}</p>
+                    ${transaction.projet ? `<p style="margin-bottom: 8px;"><strong>Projet:</strong> ${transaction.projet}</p>` : ''}
+                    <p style="margin-bottom: 8px;"><strong>Nouveau stock:</strong> ${currentPiece.quantite_stock}</p>
+                </div>
+            `;
+            showPage('success');
+        }
+        
+        // ==================== HISTORY ====================
+        function loadHistory() {
+            if (!currentStudent) return;
+            
+            document.getElementById('history-student-name').textContent = `${currentStudent.prenom} ${currentStudent.nom}`;
+            
+            const listEl = document.getElementById('history-list');
+            const transactions = DB.transactions.filter(t => t.etudiant_id === currentStudent.id);
+            
+            if (transactions.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Aucune transaction pour le moment</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            listEl.innerHTML = transactions.map(t => `
+                <div class="history-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong>${t.piece_nom}</strong>
+                        <span class="type-badge type-${t.type}">${t.type === 'sortie' ? 'Sortie' : 'Retour'}</span>
+                    </div>
+                    <p style="color: #666; font-size: 14px;">Qté: ${t.quantite} | Code: ${t.piece_code_qr}</p>
+                    ${t.projet ? `<p style="color: #667eea; font-size: 13px; margin-top: 5px;"><i class="fas fa-project-diagram"></i> ${t.projet}</p>` : ''}
+                    <p class="date"><i class="fas fa-clock"></i> ${new Date(t.date_heure).toLocaleString('fr-FR')}</p>
+                </div>
+            `).join('');
+        }
+        
+        // ==================== PROFILE ====================
+        function loadProfile() {
+            if (!currentStudent) return;
+            
+            document.getElementById('profile-name').textContent = `${currentStudent.prenom} ${currentStudent.nom}`;
+            document.getElementById('profile-details').textContent = `Matricule: ${currentStudent.matricule} | ${currentStudent.annee_etude}ème année`;
+            
+            const transactions = DB.transactions.filter(t => t.etudiant_id === currentStudent.id);
+            const sorties = transactions.filter(t => t.type === 'sortie').length;
+            const retours = transactions.filter(t => t.type === 'retour').length;
+            
+            document.getElementById('profile-total-sorties').textContent = sorties;
+            document.getElementById('profile-total-retours').textContent = retours;
+        }
+        
+        // ==================== ADMIN DASHBOARD ====================
+        function loadAdminDashboard() {
+            document.getElementById('admin-total-students').textContent = DB.students.length;
+            document.getElementById('admin-total-pieces').textContent = DB.pieces.length;
+            document.getElementById('admin-total-trans').textContent = DB.transactions.length;
+            
+            const lowStock = DB.pieces.filter(p => p.quantite_stock <= p.seuil_alerte);
+            document.getElementById('admin-low-stock').textContent = lowStock.length;
+            
+            const recentEl = document.getElementById('admin-recent-transactions');
+            if (DB.transactions.length === 0) {
+                recentEl.innerHTML = '<p style="color: #888; text-align: center;">Aucune transaction</p>';
+            } else {
+                recentEl.innerHTML = DB.transactions.slice(0, 5).map(t => `
+                    <div class="history-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong>${t.piece_nom}</strong>
+                            <span class="type-badge type-${t.type}">${t.type === 'sortie' ? 'Sortie' : 'Retour'}</span>
+                        </div>
+                        <p style="color: #666; font-size: 14px;">
+                            <i class="fas fa-user"></i> ${t.etudiant_prenom} ${t.etudiant_nom} | Qté: ${t.quantite}
+                        </p>
+                        <p class="date"><i class="fas fa-clock"></i> ${new Date(t.date_heure).toLocaleString('fr-FR')}</p>
+                    </div>
+                `).join('');
+            }
+            
+            const lowStockEl = document.getElementById('admin-low-stock-list');
+            if (lowStock.length === 0) {
+                lowStockEl.innerHTML = '<p style="color: #27ae60; text-align: center;"><i class="fas fa-check-circle"></i> Tous les stocks sont OK</p>';
+            } else {
+                lowStockEl.innerHTML = lowStock.map(p => `
+                    <div class="history-item" style="border-left-color: #f5576c;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>${p.nom}</strong>
+                            <span class="stock stock-empty">${p.quantite_stock} restant(s)</span>
+                        </div>
+                        <p style="color: #888; font-size: 13px; margin-top: 5px;">
+                            <i class="fas fa-map-marker-alt"></i> ${p.emplacement || 'N/A'} | Seuil: ${p.seuil_alerte}
+                        </p>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // ==================== ALERTS ====================
+        function showAlert(message, type) {
+            const container = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 4000);
+        }
+        
+        // ==================== INITIALIZATION ====================
+        document.getElementById('login-matricule').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+        
+        document.getElementById('admin-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') adminLogin();
+        });
+    </script>
+</body>
+</html>
